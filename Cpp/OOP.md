@@ -4,7 +4,7 @@
 
 * **继承**
     + 对于某些函数，基类希望它的派生类各自定义适合自身的版本，此时基类就将这些函数声明成**虚函数**
-    ```
+    ```cpp
     class Quote {
     public:
         std::string isbn() const;
@@ -12,7 +12,7 @@
     };
     ```
     + 派生类必须通过使用**类派生列表**明确指出它是从哪个基类继承而来的
-    ```
+    ```cpp
     class Bulk_quote : public Quote {
     public：
         double net_price(std::size_t) const override;
@@ -47,7 +47,7 @@
         `double net_price(std::size_t) const override;`
 
     + 派生类对象中含有其基类对应的组成部分，我们可以把派生类的对象当成基类对象来使用，**可以将基类的指针或引用绑定到派生类对象中的基类部分上**
-    ```
+    ```cpp
     Quote item;         // 基类对象
     Bulk_quote bulk;    // 派生类对象
     Quote* p = &item;   // p指向Quote对象
@@ -57,7 +57,7 @@
     + **编译器会隐式执行派生类到基类的类型转换，我们可以把派生类对象或者派生类对象的引用、指针用在需要基类引用或指针的地方**
 
     + 首先初始化基类部分，然后按照声明的顺序依次初始化派生类的成员
-    ```
+    ```cpp
     Bulk_quote(const std::string& book, double p,
                 std::size_t qty, double disc) :
                 Quote(book, p), min_qty(qty), discount(disc) { }
@@ -121,7 +121,7 @@
 * 用一个对象去初始化另一个对象，无关const
 
 * 默认情况下，**const对象仅在文件里有效**，如果想多个文件里使用，解决方法
-    ```
+    ```cpp
     //file.cc
     extern const int buff = fcn();
     //file.h
@@ -136,12 +136,12 @@
 * 底层const指针不允许通过指针改变值；顶层const指针不允许更改指针所指对象
 
 * **auto**忽略顶层const,保留底层const，不过可以加cosnt提醒
-    ```
+    ```cpp
     const int ci = 5;
     const auto f = ci;
     ```
 * 任何对类成员的直接访问都被看做是this的隐式引用
-    ```
+    ```cpp
     total.isbn();   // 当isbn使用bookNo, 类似this->bookNo
 
     Sales_data::isbn(&total)   //伪代码
@@ -162,7 +162,7 @@
 * 一个函数被声明为虚函数，则在所有的派生类中它都是虚函数。当派生类覆盖了某个虚函数时，该函数在基类中的形参必须与派生类中的形参严格匹配
 
 * 用**override**关键字来说明派生类中的虚函数，只有虚函数才能被覆盖
-    ```
+    ```cpp
     struct B {
         virtual void f1(int) const;
         virtual void f2();
@@ -176,7 +176,7 @@
     };
     ```
 * 用**final**关键字来将某个函数指定为final，之后任何尝试覆盖该函数的操作都将引发错误
-    ```
+    ```cpp
     struct D2 ：B {
         void f1(int) const final;
     };
@@ -188,7 +188,7 @@
 * **如果虚函数使用了默认实参，则基类和派生类中定义的默认实参最好一致**，否则实际执行基类函数
 
 * 通常情况下，成员函数（或者友元函数）中的代码需要使用基类中的虚函数，这时需要用作用域运算符来回避虚函数的机制，否则将引发无限递归调用
-    ```
+    ```cpp
     double net_price(int num)
     {
         double undiscounted = Quote::net_price(num);
@@ -200,7 +200,7 @@
 ## 抽象基类
 * 纯虚函数
     + 在声明语句的分号之前书写 **= 0** 就可以将一个**虚函数**说明为**纯虚函数，= 0 只能出现在类内部的虚函数声明语句处**
-    ```
+    ```cpp
     class Disc_quote : public Quote {
     public:
         Disc_quote() = default;
@@ -219,7 +219,7 @@
 * **含有（或者未经覆盖直接继承）纯虚函数的类是抽象基类。抽象基类负责定义接口，后续的类可以覆盖接口。不能（直接）创建一个抽象基类的对象。派生类除非覆盖了纯虚函数，否则仍将是抽象基类**
 
 * 派生类构造函数只初始化它的直接基类
-    ```
+    ```cpp
     class Bulk_quote : public Disc_quote {
     public:
         Bulk_quote() = default;
@@ -243,7 +243,7 @@
     + protected成员对于派生类的成员和友元来说是可访问的
  
     + **派生类的成员和友元只能访问派生类对象中的基类部分的受保护成员；对于普通的基类对象中的成员不具有特殊的访问权限**
-    ```
+    ```cpp
     class Base {
     protected:
         int prot_mem;
@@ -261,7 +261,7 @@
 * public、protected和private继承
 
     + **派生访问说明符对于派生类的成员（及友元）能否访问其直接基类的成员没什么影响。对基类成员的访问权限只与基类中的访问说明符有关**
-    ```
+    ```cpp
     class Base {
     public:
         void pub_mem();
@@ -286,7 +286,7 @@
     };
     ```
     + **派生访问说明符的目的是控制派生类用户（包括派生类的派生类在内）对于基类成员的访问权限**
-    ```
+    ```cpp
     Pub_Derv d1;
     Prot_Derv d2;
     Priv_Derv d3;
@@ -315,7 +315,7 @@
     + **不能继承友元关系；每个类负责控制各自成员的访问权限**
 
     + 友元能够访问源类对象的成员，这种可访问性包括了源类对象内嵌在其派生类对象中的情况
-    ```
+    ```cpp
     class Base {
         friend class Pal;
     };
@@ -330,7 +330,7 @@
 * 改变个别成员的可访问性
 
     + 通过**using声明**可以改变派生类继承的某个名字的访问级别
-    ```
+    ```cpp
     class Base {
     public:
         std::size_t size() const { return n; }
@@ -356,7 +356,7 @@
 ---
 ## 继承中的类作用域
 * 派生类的作用域位于基类作用域之内
-    ```
+    ```cpp
     {
         A               // 基类
         {
@@ -384,7 +384,7 @@
     + 如果基类中的默认构造函数、拷贝构造函数、拷贝赋值运算符或析构函数是被删除的函数或者不可访问，则派生类中对应的成员将是被删除的
 
     + 定义虚析构函数的基类默认不含有合成的移动操作，除非显式定义；一旦定义了移动操作，必须显式定义拷贝构造操作，否则会被定义为删除函数
-    ```
+    ```cpp
     class Quote {
     public:
         Quote() = default;
@@ -399,7 +399,7 @@
     + **当派生类定义了拷贝或移动操作时，该操作负责拷贝或移动包括基类部分成员在内的整个成员，析构函数则只负责销毁派生类自己分配的资源**
 
     + **默认情况下，基类默认构造函数初始化派生类对象的基类部分。如果我们想拷贝（或移动）基类部分，则必须在派生类的构造函数初始值列表中显式地使用基类的拷贝（或移动）构造函数**
-    ```
+    ```cpp
     class Base { /*...*/};
     class D : public Base {
     public:
@@ -410,7 +410,7 @@
     };
     ```
     + 赋值运算符显式为基类部分赋值,**基类的运算符应该可以正确处理自赋值情况**
-    ```
+    ```cpp
     D& D::operator=(const D& rhs)
     {
         Base::operator=(rhs);
@@ -425,7 +425,7 @@
 
 * 继承的构造函数
     + 通常情况下，using声明语句只是令某个名字在当前作用域可见。而当作用于构造函数时，using声明语句将令编译器产生代码。对于基类的每个构造函数，编译器都生成一个与之对应的派生类构造函数，如果派生类含有自己的数据成员，这些成员将被默认初始化
-    ```
+    ```cpp
     derived(parms) : base(args) { }
     ```
     + 与普通成员using声明不一样，构造函数的using声明不会改变该构造函数的访问级别，而且，一个using声明语句不能指定explicit或constexpr
@@ -434,7 +434,7 @@
 * 当派生类对象被赋值给基类对象时，其中的派生类部分将被“切掉”，因此容器和存在继承关系的类型无法兼容
 
 * **在容器中放置智能指针而非对象**
-    ```
+    ```cpp
     vector<shared_ptr<Quote>> basket;
 
     basket.push_back(make_shared<Quote>("0-201-82470",50));
